@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 
 describe('BooksService', () => {
   let service: BooksService;
-  let repository: Repository<Book>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,7 +25,6 @@ describe('BooksService', () => {
     }).compile();
 
     service = module.get<BooksService>(BooksService);
-    repository = module.get<Repository<Book>>(getRepositoryToken(Book));
   });
 
   it('should create a book', async () => {
