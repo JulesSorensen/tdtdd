@@ -30,14 +30,8 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<any> {
-    try {
-      const res = await this.usersRepository.delete(id);
-      if (res.affected < 1) throw new Error('Not found');
-    } catch {
-      return false;
-    }
-
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.usersRepository.delete(id);
+    return result.affected > 0;
   }
 }
