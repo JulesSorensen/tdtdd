@@ -45,4 +45,25 @@ describe('AuthService', () => {
       expect(result).toEqual({ access_token: token });
     });
   });
+
+  describe('validateUser', () => {
+    it('should return user data if validation is successful', async () => {
+      const user = {
+        id: 1,
+        email: 'jules@zide.fr',
+        password: await bcrypt.hash('azertyuiop', 10),
+      };
+      mockUsersService.findOneByEmail.mockResolvedValue(user);
+
+      const result = await service.validateUser('jules@zide.fr', 'azertyuiop');
+      expect(result).toEqual({ id: 1, email: 'jules@zide.fr' });
+    });
+
+    it('should return null if validation fails', async () => {
+      mockUsersService.findOneByEmail.mockResolvedValue(null);
+
+      const result = await service.validateUser('jules@zide.fr', 'azertyuiop');
+      expect(result).toBeNull();
+    });
+  });
 });
