@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
@@ -18,12 +19,14 @@ describe('UsersService', () => {
 
   describe('createUser', () => {
     it('should create a user', async () => {
-      const userDto = { name: 'John Doe', email: 'john@example.com' };
+      const userDto: CreateUserDto = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'azerty',
+      };
       const result = { id: 1, ...userDto };
 
-      jest.spyOn(service, 'createUser' as keyof UsersService).mockImplementation(async () => result);
-
-      expect(await service.createUser(userDto)).toBe(result);
+      expect(await service.create(userDto)).toBe(result);
     });
   });
 
@@ -31,15 +34,19 @@ describe('UsersService', () => {
     it('should return a user by ID', async () => {
       const result = { id: 1, name: 'John Doe', email: 'john@example.com' };
 
-      jest.spyOn(service, 'findUserById' as keyof UsersService).mockImplementation(async () => result);
+      // jest
+      //   .spyOn(service, 'findUserById' as keyof UsersService)
+      //   .mockImplementation(async () => result);
 
-      expect(await service.findUserById(1)).toBe(result);
+      expect(await service.findOne(1)).toBe(result);
     });
 
     it('should return null if user not found', async () => {
-      jest.spyOn(service, 'findUserById' as keyof UsersService).mockImplementation(async () => null);
+      jest
+        .spyOn(service, 'findUserById' as keyof UsersService)
+        .mockImplementation(async () => null);
 
-      expect(await service.findUserById(999)).toBeNull();
+      expect(await service.findOne(999)).toBeNull();
     });
   });
 
@@ -51,23 +58,25 @@ describe('UsersService', () => {
       };
       const result = { id: 1, ...userDto };
 
-      jest.spyOn(service, 'updateUser' as keyof UsersService).mockImplementation(async () => result);
-
-      expect(await service.updateUser(1, userDto)).toBe(result);
+      expect(await service.update(1, userDto)).toBe(result);
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      jest.spyOn(service, 'deleteUser' as keyof UsersService).mockImplementation(async () => true);
+      jest
+        .spyOn(service, 'deleteUser' as keyof UsersService)
+        .mockImplementation(async () => true);
 
-      expect(await service.deleteUser(1)).toBe(true);
+      expect(await service.remove(1)).toBe(true);
     });
 
     it('should return false if user not found', async () => {
-      jest.spyOn(service, 'deleteUser' as keyof UsersService).mockImplementation(async () => false);
+      jest
+        .spyOn(service, 'deleteUser' as keyof UsersService)
+        .mockImplementation(async () => false);
 
-      expect(await service.deleteUser(999)).toBe(false);
+      expect(await service.remove(999)).toBe(false);
     });
   });
 });
