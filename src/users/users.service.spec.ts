@@ -1,16 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;
+  let repository: Repository<User>;
+  let createdUser: User;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        TypeOrmModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [User],
+          synchronize: true,
+        }),
+        TypeOrmModule.forFeature([User]),
+      ],
       providers: [UsersService],
+      controllers: [UsersController],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
+    repository = module.get<Repository<User>>(getRepositoryToken(User));
+
+    const user = new User();
+    user.name = 'A';
+    user.email = 'A';
+    user.password = 'A';
+
+    createdUser = await repository.save(user);
   });
 
   it('should be defined', () => {
@@ -24,59 +48,56 @@ describe('UsersService', () => {
         email: 'john@example.com',
         password: 'azerty',
       };
-      const result = { id: 1, ...userDto };
 
-      expect(await service.create(userDto)).toBe(result);
+      const data = await service.create(userDto);
+      expect(data).toBeDefined();
+      expect(data.name).toEqual(userDto.name);
+      expect(data.email).toEqual(userDto.email);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return users', async () => {
+      const users = await service.findAll();
+      expect(users.length).toBeGreaterThan(0);
     });
   });
 
   describe('findUserById', () => {
     it('should return a user by ID', async () => {
-      const result = { id: 1, name: 'John Doe', email: 'john@example.com' };
+      const result = {
+        name: 'A',
+      };
 
-      // jest
-      //   .spyOn(service, 'findUserById' as keyof UsersService)
-      //   .mockImplementation(async () => result);
-
-      expect(await service.findOne(1)).toBe(result);
+      const updated = await service.findOne(createdUser.id);
+      expect(updated).toBeDefined();
+      expect(updated.name).toBe(result.name);
     });
 
     it('should return null if user not found', async () => {
-      jest
-        .spyOn(service, 'findUserById' as keyof UsersService)
-        .mockImplementation(async () => null);
-
       expect(await service.findOne(999)).toBeNull();
     });
   });
 
   describe('updateUser', () => {
     it('should update a user', async () => {
-      const userDto = {
-        name: 'John Doe Updated',
-        email: 'john.updated@example.com',
+      const result = {
+        name: 'Salut',
       };
-      const result = { id: 1, ...userDto };
 
-      expect(await service.update(1, userDto)).toBe(result);
+      const updated = await service.update(createdUser.id, result);
+      expect(updated).toBeDefined();
+      expect(updated.name).toBe(result.name);
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      jest
-        .spyOn(service, 'deleteUser' as keyof UsersService)
-        .mockImplementation(async () => true);
-
-      expect(await service.remove(1)).toBe(true);
+      expect(await service.remove(createdUser.id)).toEqual(true);
     });
 
     it('should return false if user not found', async () => {
-      jest
-        .spyOn(service, 'deleteUser' as keyof UsersService)
-        .mockImplementation(async () => false);
-
-      expect(await service.remove(999)).toBe(false);
+      expect(await service.remove(999)).toEqual(false);
     });
   });
 });
