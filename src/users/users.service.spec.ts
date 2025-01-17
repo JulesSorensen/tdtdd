@@ -21,7 +21,7 @@ describe('UsersService', () => {
       const userDto = { name: 'John Doe', email: 'john@example.com' };
       const result = { id: 1, ...userDto };
 
-      jest.spyOn(service, 'createUser').mockImplementation(async () => result);
+      jest.spyOn(service, 'createUser' as keyof UsersService).mockImplementation(async () => result);
 
       expect(await service.createUser(userDto)).toBe(result);
     });
@@ -31,15 +31,13 @@ describe('UsersService', () => {
     it('should return a user by ID', async () => {
       const result = { id: 1, name: 'John Doe', email: 'john@example.com' };
 
-      jest
-        .spyOn(service, 'findUserById')
-        .mockImplementation(async () => result);
+      jest.spyOn(service, 'findUserById' as keyof UsersService).mockImplementation(async () => result);
 
       expect(await service.findUserById(1)).toBe(result);
     });
 
     it('should return null if user not found', async () => {
-      jest.spyOn(service, 'findUserById').mockImplementation(async () => null);
+      jest.spyOn(service, 'findUserById' as keyof UsersService).mockImplementation(async () => null);
 
       expect(await service.findUserById(999)).toBeNull();
     });
@@ -53,7 +51,7 @@ describe('UsersService', () => {
       };
       const result = { id: 1, ...userDto };
 
-      jest.spyOn(service, 'updateUser').mockImplementation(async () => result);
+      jest.spyOn(service, 'updateUser' as keyof UsersService).mockImplementation(async () => result);
 
       expect(await service.updateUser(1, userDto)).toBe(result);
     });
@@ -61,13 +59,13 @@ describe('UsersService', () => {
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      jest.spyOn(service, 'deleteUser').mockImplementation(async () => true);
+      jest.spyOn(service, 'deleteUser' as keyof UsersService).mockImplementation(async () => true);
 
       expect(await service.deleteUser(1)).toBe(true);
     });
 
     it('should return false if user not found', async () => {
-      jest.spyOn(service, 'deleteUser').mockImplementation(async () => false);
+      jest.spyOn(service, 'deleteUser' as keyof UsersService).mockImplementation(async () => false);
 
       expect(await service.deleteUser(999)).toBe(false);
     });
